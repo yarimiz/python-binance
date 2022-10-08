@@ -1079,7 +1079,7 @@ class BinanceSocketManager:
         """
         return self._get_account_socket('margin')
 
-    def futures_socket(self):
+    def futures_socket(self, symbol: str):
         """Start a websocket for futures data
 
             https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
@@ -1088,7 +1088,7 @@ class BinanceSocketManager:
 
         Message Format - see Binance API docs for all types
         """
-        return self._get_account_socket('futures', stream_url=self.FSTREAM_URL)
+        return self._get_socket(symbol.lower() + "@trade", stream_url=self.FSTREAM_URL)
 
     def coin_futures_socket(self):
         """Start a websocket for coin futures data
@@ -1428,11 +1428,13 @@ class ThreadedWebsocketManager(ThreadedApiManager):
             params={}
         )
 
-    def start_futures_socket(self, callback: Callable) -> str:
+    def start_futures_socket(self, callback: Callable, symbol: str) -> str:
         return self._start_async_socket(
             callback=callback,
-            socket_name='futures_socket',
-            params={}
+            socket_name="futures_socket",
+            params={
+                "symbol": symbol,
+            },
         )
 
     def start_coin_futures_socket(self, callback: Callable) -> str:
