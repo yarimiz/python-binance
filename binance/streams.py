@@ -400,6 +400,8 @@ class BinanceSocketManager:
             )
 
         return self._conns[conn_id]
+    
+    def _get_futures_socket(self, path: str, futures_type: FuturesType, prefix: str = 'stream?streams='):
         socket_type: BinanceSocketType = BinanceSocketType.USD_M_FUTURES
         if futures_type == FuturesType.USD_M:
             stream_url = self.FSTREAM_URL
@@ -1445,6 +1447,13 @@ class ThreadedWebsocketManager(ThreadedApiManager):
         return self._start_async_socket(
             callback=callback,
             socket_name='user_socket',
+            params={}
+        )
+
+    def start_futures_user_socket(self, callback: Callable) -> str:
+        return self._start_async_socket(
+            callback=callback,
+            socket_name='futures_user_socket',
             params={}
         )
 
