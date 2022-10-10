@@ -337,6 +337,13 @@ class BinanceSocketManager:
             stream_url = self.STREAM_TESTNET_URL
         return stream_url
 
+    def _get_futures_stream_url(self, stream_url: Optional[str] = None):
+        if stream_url:
+            return stream_url
+        stream_url = self.FSTREAM_URL
+        if self.testnet:
+            stream_url = self.FSTREAM_TESTNET_URL
+        return stream_url
     def _get_socket(
         self, path: str, stream_url: Optional[str] = None, prefix: str = 'ws/', is_binary: bool = False,
         socket_type: BinanceSocketType = BinanceSocketType.SPOT
@@ -372,7 +379,27 @@ class BinanceSocketManager:
 
         return self._conns[conn_id]
 
-    def _get_futures_socket(self, path: str, futures_type: FuturesType, prefix: str = 'stream?streams='):
+    def _get_futures_account_socket(
+        self,
+        path: str,
+        stream_url: Optional[str] = None,
+        prefix: str = "ws/",
+        is_binary: bool = False,
+    ):
+        conn_id = f"{BinanceSocketType.ACCOUNT}_{path}"
+        if conn_id not in self._conns:
+            self._conns[conn_id] = KeepAliveWebsocket(
+                client=self._client,
+                loop=self._loop,
+                url=self._get_futures_stream_url(stream_url),
+                keepalive_type=path,
+                prefix=prefix,
+                exit_coro=self._exit_socket,
+                is_binary=is_binary,
+                user_timeout=self._user_timeout,
+            )
+
+        return self._conns[conn_id]
         socket_type: BinanceSocketType = BinanceSocketType.USD_M_FUTURES
         if futures_type == FuturesType.USD_M:
             stream_url = self.FSTREAM_URL
@@ -1066,7 +1093,7 @@ class BinanceSocketManager:
         Message Format - see Binanace API docs for all types
         """
 
-        return self._get_account_socket('futures', stream_url=self.FSTREAM_URL)
+        return self._get_futures_account_socket("futures")
 
     def margin_socket(self):
         """Start a websocket for cross-margin data
