@@ -449,6 +449,8 @@ class ThreadedDepthCacheManager(ThreadedApiManager):
         conv_type=float,
         **kwargs,
     ) -> str:
+        while not self._client:
+            time.sleep(0.1)
         dcm = dcm_class(
             client=self._client,
             symbol=symbol,
