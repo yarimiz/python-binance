@@ -622,6 +622,40 @@ class BinanceSocketManager:
 
         return self._get_socket(symbol.lower() + '@trade')
 
+    def futures_trade_socket(
+        self, symbol: str, futures_type: FuturesType = FuturesType.USD_M
+    ):
+        """Start a websocket for symbol futures trade data
+
+        https://github.com/binance-exchange/binance-official-api-docs/blob/master/web-socket-streams.md#trade-streams
+
+        :param symbol: required
+        :type symbol: str
+
+        :returns: connection key string if successful, False otherwise
+
+        Message Format
+
+        .. code-block:: python
+
+            {
+                "e": "trade",     # Event type
+                "E": 123456789,   # Event time
+                "s": "BNBBTC",    # Symbol
+                "t": 12345,       # Trade ID
+                "p": "0.001",     # Price
+                "q": "100",       # Quantity
+                "b": 88,          # Buyer order Id
+                "a": 50,          # Seller order Id
+                "T": 123456785,   # Trade time
+                "m": true,        # Is the buyer the market maker?
+                "M": true         # Ignore.
+            }
+
+        """
+
+        return self._get_futures_socket(symbol.lower() + "@trade", futures_type)
+
     def aggtrade_socket(self, symbol: str):
         """Start a websocket for symbol trade data
 
@@ -1254,6 +1288,8 @@ class ThreadedWebsocketManager(ThreadedApiManager):
                 'symbol': symbol,
             }
         )
+
+    
 
     def start_aggtrade_socket(self, callback: Callable, symbol: str) -> str:
         return self._start_async_socket(
