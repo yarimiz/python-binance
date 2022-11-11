@@ -7640,7 +7640,7 @@ class AsyncClient(BaseClient):
     # Account Endpoints
 
     async def create_order(self, **params):
-        return await self._post('order', True, data=params)
+        return await self._post('order', True, data=params, version="v3")
     create_order.__doc__ = Client.create_order.__doc__
 
     async def order_limit(self, timeInForce=BaseClient.TIME_IN_FORCE_GTC, **params):
